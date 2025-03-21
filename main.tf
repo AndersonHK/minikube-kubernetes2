@@ -14,17 +14,18 @@ provider "kubernetes" {
 
 resource "kubernetes_namespace" "demo" {
   metadata {
-    name = "k8s-tf"
+    name = "k8s-tf2"
   }
 }
 
-resource "kubernetes_deployment" "demo" {
+resource "kubernetes_deployment" "example" {
   metadata {
-    name = "terraform-demo"
+    name = "terraform-example-1"
     labels = {
-      test = "MydemoApp"
+      test = "MyExampleApp"
     }
-    namespace = "k8s-tf"
+    namespace = "k8s-tf2"
+
   }
 
   spec {
@@ -32,22 +33,25 @@ resource "kubernetes_deployment" "demo" {
 
     selector {
       match_labels = {
-        test = "MydemoApp"
+        test = "MyExampleApp"
       }
     }
 
     template {
       metadata {
         labels = {
-          test = "MydemoApp"
+          test = "MyExampleApp"
         }
       }
 
       spec {
         container {
           image = "nginx:1.21.6"
-          name  = "demo"
-
+          name  = "example"
+          port {
+            container_port = 80
+          }
+         
           resources {
             limits = {
               cpu    = "0.5"
@@ -58,8 +62,42 @@ resource "kubernetes_deployment" "demo" {
               memory = "50Mi"
             }
           }
+
+          liveness_probe {
+            http_get {
+              path = "/"
+              port = 80
+
+              http_header {
+                name  = "X-Custom-Header"
+                value = "Awesome"
+              }
+            }
+          }     
         }
       }
     }
   }
+}
+resource "kubernetes_service" "myDemoApp2Service" {          
+    metadata {
+        name = "terraform-demo2-service"     
+        # namespace = "k8s-tf2"                      
+    }
+    spec {
+        selector = {
+            # pod = kubernetes_deployment.demo2.metadata[0].labels["pod"]       
+            # pod = "terraform-demo2-pod"
+            # app = "terraform-demo2-service"  
+            app = kubernetes_deployment.example.metadata[0].labels["test"]
+        } 
+        session_affinity = "ClientIP"  
+        port {
+            port  = 8080
+            target_port = 80
+        }
+   
+       
+        type = "NodePort"                       
+    }
 }
