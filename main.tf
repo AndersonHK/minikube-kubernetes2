@@ -33,14 +33,14 @@ resource "kubernetes_deployment" "example" {
 
     selector {
       match_labels = {
-        test = "MyExampleApp"
+        app = "MyExampleApp"
       }
     }
 
     template {
       metadata {
         labels = {
-          test = "MyExampleApp"
+          app = "MyExampleApp"
         }
       }
 
@@ -82,18 +82,19 @@ resource "kubernetes_deployment" "example" {
 resource "kubernetes_service" "myDemoApp2Service" {          
     metadata {
         name = "terraform-demo2-service"     
-        # namespace = "k8s-tf2"                      
+        namespace = "k8s-tf2"                      
     }
     spec {
         selector = {
             # pod = kubernetes_deployment.demo2.metadata[0].labels["pod"]       
             # pod = "terraform-demo2-pod"
             # app = "terraform-demo2-service"  
-            app = kubernetes_deployment.example.metadata[0].labels["test"]
+            # app = kubernetes_deployment.example.metadata[0].labels["test"]'
+            app = "MyExampleApp"
         } 
         session_affinity = "ClientIP"  
         port {
-            port  = 8080
+            port  = 8085
             target_port = 80
         }
    
