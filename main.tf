@@ -86,10 +86,6 @@ resource "kubernetes_service" "myDemoApp2Service" {
     }
     spec {
         selector = {
-            # pod = kubernetes_deployment.demo2.metadata[0].labels["pod"]       
-            # pod = "terraform-demo2-pod"
-            # app = "terraform-demo2-service"  
-            # app = kubernetes_deployment.example.metadata[0].labels["test"]'
             app = "MyExampleApp"
         } 
         session_affinity = "ClientIP"  
